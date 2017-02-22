@@ -3,7 +3,6 @@ from lxml import etree
 
 # myfile = open('books.xml')
 # my_iterable = xmltodict.parse(myfile)
-
 # # books = my_iterable['catalog']['book']
 # for key in my_iterable.get('catalog', {}).get('book'):
 #      print key['title'] +"\t",key['genre'] +"\t",key['price']
