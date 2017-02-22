@@ -14,12 +14,12 @@ with open('20170225RAND0.xml', "rb") as f:
     str_tree = etree.tostring(tree, pretty_print=True)
 
     MY_ITERABLE = xmltodict.parse(str_tree)
-    # for key in MY_ITERABLE.get('meeting', {}).get('race'):
-    for key in MY_ITERABLE.items():
-        # print(key[1]['@id'], key[1]['@venue'], key[1]['@weather'],
-        #       key[1]['@rail'])
-        for race_key in MY_ITERABLE.get('meeting', {}).get('race'):
-            print(race_key['@shortname'])
-            for nom_key in MY_ITERABLE.get('meeting', {}).get('race'):
-                for nkey in nom_key.get('nomination', {}):
-                    print(nkey['@horse'])
+    for key in MY_ITERABLE.get('meeting', {}).get('race'):
+        for key in MY_ITERABLE.items():
+            print(key[1]['@id'], key[1]['@venue'], key[1]['@weather'],
+                  key[1]['@rail'])
+            for race_key in MY_ITERABLE.get('meeting', {}).get('race'):
+                print(race_key['@shortname'])
+                for nom_key in MY_ITERABLE.get('meeting', {}).get('race'):
+                    for nkey in nom_key.get('nomination', {}):
+                        print(nkey['@horse'])
