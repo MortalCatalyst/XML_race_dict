@@ -24,24 +24,35 @@ import csv
 #                     for nkey in nom_key.get('nomination', {}):
 #                         print(nkey['@horse'])
 
-with open('20170225RAND0.xml', "rb") as f:
+with open('RAND.xml', "rb") as f, open('mycsv.csv', 'w') as g:
     parser = etree.XMLParser(remove_comments=True)
     tree = etree.parse(f, parser=parser)
     str_tree = etree.tostring(tree, pretty_print=True)
-    meeting_list = []
-    race_list = []
-    nominaton_list = []
+    # meeting_list = []
+    # race_list = []
+    # nominaton_list = []
+    writer = csv.writer(g)
+    writer.writerow(('meeting_id', 'venue', 'race_id'))
 
     MY_ITERABLE = xmltodict.parse(str_tree)
     for key in MY_ITERABLE.get('meeting', {}).get('race'):
         for key in MY_ITERABLE.items():
-            meet_id = key[1]['@id']
-            meet_venue = key[1]['@venue']
-            meet_wee = key[1]['@weather']
-            meet_rail = key[1]['@rail']
+            meet_output = (key[1]['@id'], key[1]['@venue'], key[1]['@weather'],
+                           key[1]['@rail'])
+            # meet_id = key[1]['@id']
+            # meet_venue = key[1]['@venue']
+            # meet_wee = key[1]['@weather']
+            # meet_rail = key[1]['@rail']
             for race_key in MY_ITERABLE.get('meeting', {}).get('race'):
-                r_short = race_key['@shortname']
-                r_key = race_key['@id']
-                for nom_key in MY_ITERABLE.get('meeting', {}).get('race'):
-                    for nkey in nom_key.get('nomination', {}):
-                        print(meet_id, r_key, r_short, nkey['@horse'])
+                race_output = (race_key['@id'], race_key['@shortname'])
+                # r_short = race_key['@shortname']
+                # r_key = race_key['@id']
+                for nkey in race_key.get('nomination', {}):
+                    horseName = nkey['@horse']
+                    barrier = nkey['@barrier']
+                    weight = nkey['@weight']
+                    rating = nkey['@rating']
+                    output = (meet_output[0], meet_output[1], race_output[0])
+                    writer.writerow((output))
+        # print(output)
+        # print(meet_id, r_key, r_short, horseName, barrier, rating)
