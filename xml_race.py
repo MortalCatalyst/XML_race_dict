@@ -32,19 +32,24 @@ with open('RAND.xml', "rb") as f, open('mycsv.csv', 'w') as g:
     # race_list = []
     # nominaton_list = []
     writer = csv.writer(g)
-    writer.writerow(('meeting_id', 'venue', 'race_id'))
+    writer.writerow(('meeting_id', 'venue', 'trackcondition', 'date',
+                     'race_number', 'race_id', 'age', 'distance', 'class'))
 
     MY_ITERABLE = xmltodict.parse(str_tree)
     for key in MY_ITERABLE.get('meeting', {}).get('race'):
         for key in MY_ITERABLE.items():
-            meet_output = (key[1]['@id'], key[1]['@venue'], key[1]['@weather'],
+            meet_output = (key[1]['@id'], key[1]['@venue'],
+                           key[1]['@trackcondition'].strip(), key[1]['@date'],
                            key[1]['@rail'])
             # meet_id = key[1]['@id']
             # meet_venue = key[1]['@venue']
             # meet_wee = key[1]['@weather']
             # meet_rail = key[1]['@rail']
             for race_key in MY_ITERABLE.get('meeting', {}).get('race'):
-                race_output = (race_key['@id'], race_key['@shortname'])
+                race_output = (race_key['@number'], race_key['@id'],
+                               race_key['@shortname'],
+                               race_key['@age'].strip(), race_key['@distance'],
+                               race_key['@class'])
                 # r_short = race_key['@shortname']
                 # r_key = race_key['@id']
                 for nkey in race_key.get('nomination', {}):
@@ -52,7 +57,9 @@ with open('RAND.xml', "rb") as f, open('mycsv.csv', 'w') as g:
                     barrier = nkey['@barrier']
                     weight = nkey['@weight']
                     rating = nkey['@rating']
-                    output = (meet_output[0], meet_output[1], race_output[0])
+                    output = (meet_output[0], meet_output[1], meet_output[2],
+                              meet_output[3], race_output[0], race_output[1],
+                              race_output[3], race_output[4], race_output[5])
                     writer.writerow((output))
         # print(output)
         # print(meet_id, r_key, r_short, horseName, barrier, rating)
