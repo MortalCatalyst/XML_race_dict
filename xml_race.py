@@ -1,10 +1,15 @@
-import csv
+# import csv
+import sqlite3
 import xmltodict
 from lxml import etree
-import sqlite3
+import pprint
 
 
 def meet_key(meet_string):
+    """
+    Create a output for each type of race element
+    from the meeting node.
+    """
     MY_ITERABLE = xmltodict.parse(meet_string)
     for key in MY_ITERABLE.get('meeting', {}).get('race'):
         for key in MY_ITERABLE.items():
@@ -14,7 +19,8 @@ def meet_key(meet_string):
 
 def race_out(race_string):
     """
-    Create a output for each type of race.
+    Create a output for each type of race element
+    from the race node.
     """
     my_output = []
     MY_ITERABLE = xmltodict.parse(race_string)
@@ -28,11 +34,29 @@ def race_out(race_string):
     return my_output
 
 
+def horse(race_string):
+    """
+    Create a output for each type of race element
+    from the horse attributes.
+    """
+    # TODO: split the list of goodtrack into the horse list at position
+    horse_data = []
+    MY_ITERABLE = xmltodict.parse(race_string)
+    for race_key in MY_ITERABLE.get('meeting', {}).get('race'):
+        for nkey in race_key.get('nomination', {}):
+            horse_output = [
+                nkey['@horse'], nkey['@barrier'], nkey['@weight'],
+                nkey['@rating'], nkey['@goodtrack'].split("-")
+            ]
+            horse_data.append(horse_output)
+    return horse_data
+
+
 # with open('RAND.xml', "rb") as f, open('mycsv.csv', 'w') as g:
 with open('RAND.xml', "rb") as f, sqlite3.connect("race.db") as connection:
     c = connection.cursor()
     c.execute(
-        """CREATE	TABLE race(R_Number	INT, R_KEY INT, R_NAME TEXT, R_AGE INT, \
+        """CREATE TABLE IF NOT EXISTS race(R_Number	INT, R_KEY INT, R_NAME TEXT, R_AGE INT, \
         R_DIST TEXT, R_CLASS, M_ID INT)""")
 
     parser = etree.XMLParser(remove_comments=True)
@@ -44,8 +68,13 @@ with open('RAND.xml', "rb") as f, sqlite3.connect("race.db") as connection:
     for item in a:
         item.append(meeting_key)
 
-    c.executemany('INSERT into race VALUES(?,?,?,?,?,?,?)', a)
+    b = horse(str_tree)
+    meeting_key = meet_key(str_tree)
+    for item in b:
+        item.insert(0, meeting_key)
+    # c.executemany('INSERT into race VALUES(?,?,?,?,?,?,?)', a)
     # writer = csv.writer(g)
+
     # writer.writerow(
     #     ('meeting_id', 'venue', 'trackcondition', 'date', 'race_number',
     #      'race_id', 'age', 'distance', 'class', 'horse', 'barrier', 'weight',
@@ -73,7 +102,8 @@ with open('RAND.xml', "rb") as f, sqlite3.connect("race.db") as connection:
     #                 rating = nkey['@rating']
     #                 print(race_output)
 
-print(a)
+pp = pprint.PrettyPrinter(indent=4, width=100)
+pp.pprint(b)
 # output = (meet_output[0], meet_output[1], meet_output[2],
 #           meet_output[3], race_output[0], race_output[1],
 #           race_output[3], race_output[4], race_output[5],
