@@ -46,13 +46,26 @@ def horse(race_string):
         for nkey in race_key.get('nomination', {}):
             horse_output = [
                 nkey['@horse'], nkey['@barrier'], nkey['@weight'],
-                nkey['@rating'], nkey['@goodtrack'].split("-")
+                nkey['@rating'], nkey['@variedweight'], nkey['@trainernumber'],
+                nkey['@goodtrack'].split("-"), nkey['@career'].split("-"),
+                nkey['@firstup'].split("-")
             ]
             horse_data.append(horse_output)
     return horse_data
 
 
-# with open('RAND.xml', "rb") as f, open('mycsv.csv', 'w') as g:
+def flatten_inplace(rows, *index):
+    """
+    Flattens in place by assigning the list item
+    to the index of the current list.
+    """
+    for row in rows:
+        for ind in index:
+            row[ind:ind + 1] = row[ind]
+
+    return rows
+
+
 with open('RAND.xml', "rb") as f, sqlite3.connect("race.db") as connection:
     c = connection.cursor()
     c.execute(
@@ -72,41 +85,9 @@ with open('RAND.xml', "rb") as f, sqlite3.connect("race.db") as connection:
     meeting_key = meet_key(str_tree)
     for item in b:
         item.insert(0, meeting_key)
-    # c.executemany('INSERT into race VALUES(?,?,?,?,?,?,?)', a)
-    # writer = csv.writer(g)
 
-    # writer.writerow(
-    #     ('meeting_id', 'venue', 'trackcondition', 'date', 'race_number',
-    #      'race_id', 'age', 'distance', 'class', 'horse', 'barrier', 'weight',
-    #      'rating', 'starts_gt', 'wins_gt', 'second_gt', 'third_gt'))
+    c.executemany('INSERT into race VALUES(?,?,?,?,?,?,?)', a)
 
-    # MY_ITERABLE = xmltodict.parse(str_tree)
-    # for key in MY_ITERABLE.get('meeting', {}).get('race'):
-    #     for key in MY_ITERABLE.items():
-    #         meet_output = (key[1]['@id'], key[1]['@venue'],
-    #                        key[1]['@trackcondition'].strip(), key[1]['@date'],
-    #                        key[1]['@rail'])
-    #         for race_key in MY_ITERABLE.get('meeting', {}).get('race'):
-    #             race_output = (race_key['@number'], race_key['@id'],
-    #                            race_key['@shortname'],
-    #                            race_key['@age'].strip(), race_key['@distance'],
-    #                            race_key['@class'].strip())
-    #             # race_output += (key[1]['@id'], )
-    #             for nkey in race_key.get('nomination', {}):
-    #                 horse_output = (nkey['@horse'], nkey['@barrier'],
-    #                                 nkey['@weight'], nkey['@rating'],
-    #                                 nkey['@goodtrack'].split("-"))
-    #                 horseName = nkey['@horse']
-    #                 barrier = nkey['@barrier']
-    #                 weight = nkey['@weight']
-    #                 rating = nkey['@rating']
-    #                 print(race_output)
-
+output = flatten_inplace(b, 7, 11, 15)
 pp = pprint.PrettyPrinter(indent=4, width=100)
-pp.pprint(b)
-# output = (meet_output[0], meet_output[1], meet_output[2],
-#           meet_output[3], race_output[0], race_output[1],
-#           race_output[3], race_output[4], race_output[5],
-#           horse_output[0], horse_output[1],
-#           horse_output[2], horse_output[3],
-#           horse_output[4][0], horse_output[4][1],
+pp.pprint(output)
