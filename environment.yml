@@ -1,0 +1,7 @@
+name: xml34
+dependencies:
+  - python=3.4
+  - lxml
+  - pip:
+    - xmltodict
+    - yapf
